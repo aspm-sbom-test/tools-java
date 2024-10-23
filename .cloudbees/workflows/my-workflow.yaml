@@ -1,0 +1,25 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: My workflow
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+jobs:
+  build:
+    steps:
+      - name: Get source code
+        uses: cloudbees-io/checkout@v1
+      - name: Build Java App
+        uses: docker://maven:3.8.4-eclipse-temurin-17
+        run: |
+          mvn clean package
+      - id: upload-binary
+        name: Upload binary using action
+        uses: calculi-corp/assets-plugin-chain-utils/upload-binary@v1
+        with:
+          file-path: /cloudbees/workspace/target/tools-java.jar
+          debug: "true"
+          file-name: tools-java.jar
+          file-type: BINARY_JAR
