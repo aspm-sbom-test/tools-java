@@ -19,7 +19,7 @@ jobs:
         name: Upload binary using action
         uses: calculi-corp/assets-plugin-chain-utils/upload-binary@v1
         with:
-          file-path: /cloudbees/workspace/target/tools-java.jar
+          file-path: /cloudbees/workspace/target/tools-java-2.0.1-SNAPSHOT.jar
           debug: "true"
-          file-name: tools-java.jar
+          file-name: tools-java-2.0.1-SNAPSHOT.jar
           file-type: BINARY_JAR
