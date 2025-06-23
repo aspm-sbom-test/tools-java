@@ -1,0 +1,37 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: My workflow
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+permissions:
+  scm-token-own: read
+  scm-token-org: read
+  id-token: write
+jobs:
+  build:
+    steps:
+      - name: Get source code
+        uses: cloudbees-io/checkout@v1
+      - id: build-container
+        name: Build container image
+        uses: docker://gcr.io/kaniko-project/executor:debug
+        run: |
+          /kaniko/executor --context $CLOUDBEES_WORKSPACE --build-arg USER=cbp,TOKEN=${{ secrets.GH_SECURITY_PAT }} --dockerfile $CLOUDBEES_WORKSPACE/Dockerfile --tar-path $CLOUDBEES_WORKSPACE/container-image.tar --no-push
+      - id: register-artifact
+        name: Register the artifact
+        uses: cloudbees-io/register-build-artifact@v1
+        with:
+          name: qe-artifact
+          version: QE-23.6.5
+          url: 020229604682.dkr.ecr.us-east-1.amazonaws.com/throwaway/actions/vulnerable-image:QE-23.6.5
+      - id: upload-binary
+        name: Upload binary using action
+        uses: cloudbees-io/asset-chain-utils-preprod/upload-binary@v1
+        with:
+          file-path: container-image.tar
+          file-type: BINARY_CONTAINER
+          debug: "true"
+          alias: 020229604682.dkr.ecr.us-east-1.amazonaws.com/throwaway/actions/vulnerable-image:QE-23.6.5
